@@ -17,13 +17,7 @@ This project implements a stochastic discrete-event simulation to study the perf
 submission/
 ├── README.md                 # This file
 ├── main_report.ipynb         # Main analysis and findings
-├── simulation.py             # Core simulation code
-├── data/
-│   ├── baseline_results.csv      # Baseline experiment results
-│   ├── arrival_sensitivity.csv   # Arrival rate sensitivity results
-│   ├── prompt_sensitivity.csv    # Prompt length sensitivity results
-│   └── output_sensitivity.csv    # Output budget sensitivity results
-└── figures/                  # Generated plots (optional)
+└── simulation.py             # Core simulation code
 ```
 
 ## Requirements
@@ -53,17 +47,9 @@ pip install numpy matplotlib scipy
 
 3. **Run all cells** in order (Cell → Run All).
 
-The notebook imports functions from `simulation.py` and loads precomputed results from the `data/` directory. All visualizations and analysis will be generated automatically.
+The notebook imports functions from `simulation.py` and generates all visualizations and analysis.
 
-## Reproducing Results
-
-To regenerate all experimental results from scratch:
-
-1. Open `main_report.ipynb`
-2. Set `REGENERATE_DATA = True` in the configuration cell
-3. Run all cells
-
-**Note:** Full reproduction takes approximately 15-20 minutes due to long simulation runs (12,000 seconds simulated time per configuration, 5 replications each).
+**Note:** Full execution takes approximately 15-20 minutes due to long simulation runs (12,000 seconds simulated time per configuration, 5 replications each).
 
 ## Key Parameters
 

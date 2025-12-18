@@ -48,6 +48,10 @@ if PROMPT_LENGTH > MAX_BATCH_SIZE:
 if WARMUP_TIME >= SIM_DURATION:
     raise ValueError("WARMUP_TIME must be < SIM_DURATION")
 
+import pandas as pd
+import os
+os.makedirs('data', exist_ok=True)
+
 def generate_service_time(num_tokens):
     """Service time: S(b) = c + a * max(0, b - b0), with exponential randomness."""
     if num_tokens <= 0:
@@ -271,6 +275,19 @@ print(f"{'Mean TBT (ms)':<25} {safe_mean(results_decode['tbt']):>18.2f} {safe_me
 print(f"{'P95 TBT (ms)':<25} {safe_percentile(results_decode['tbt'], 95):>18.2f} {safe_percentile(results_prefill['tbt'], 95):>18.2f}")
 print(f"{'Throughput (queries/sec)':<25} {tp_d:>18.2f} {tp_p:>18.2f}")
 print("=" * 65)
+
+# Save baseline results
+baseline_df = pd.DataFrame({
+    'scheduler': ['Decode-First', 'Prefill-First'],
+    'queries_completed': [len(results_decode['ttft']), len(results_prefill['ttft'])],
+    'mean_ttft': [safe_mean(results_decode['ttft']), safe_mean(results_prefill['ttft'])],
+    'p95_ttft': [safe_percentile(results_decode['ttft'], 95), safe_percentile(results_prefill['ttft'], 95)],
+    'mean_tbt': [safe_mean(results_decode['tbt']), safe_mean(results_prefill['tbt'])],
+    'p95_tbt': [safe_percentile(results_decode['tbt'], 95), safe_percentile(results_prefill['tbt'], 95)],
+    'throughput': [tp_d, tp_p]
+})
+baseline_df.to_csv('data/baseline_results.csv', index=False)
+print("Saved: data/baseline_results.csv")
 
 """## 5. Validation: M/M/1 Queue
 
@@ -517,6 +534,16 @@ for lam in arrival_rates:
     mean_ttft.append(metrics["avg_TTFT"])
     throughput.append(metrics["throughput_qps"])
 
+# Save arrival rate sensitivity results
+arrival_df = pd.DataFrame({
+    'arrival_rate': arrival_rates,
+    'mean_ttft': mean_ttft,
+    'p95_ttft': p95_ttft,
+    'throughput': throughput
+})
+arrival_df.to_csv('data/arrival_sensitivity.csv', index=False)
+print("Saved: data/arrival_sensitivity.csv")
+
 import matplotlib.pyplot as plt
 
 plt.figure()
@@ -545,6 +572,16 @@ for L in prompt_lengths:
     mean_ttft_prompt.append(metrics["avg_TTFT"])
     p95_ttft_prompt.append(metrics["p95_TTFT"])
     throughput_prompt.append(metrics["throughput_qps"])
+
+# Save prompt length sensitivity results
+prompt_df = pd.DataFrame({
+    'prompt_length': prompt_lengths,
+    'mean_ttft': mean_ttft_prompt,
+    'p95_ttft': p95_ttft_prompt,
+    'throughput': throughput_prompt
+})
+prompt_df.to_csv('data/prompt_sensitivity.csv', index=False)
+print("Saved: data/prompt_sensitivity.csv")
 
 import matplotlib.pyplot as plt
 
@@ -576,6 +613,17 @@ for B in output_budgets:
     p95_tbt_output.append(metrics["p95_TBT"])
     mean_ttft_output.append(metrics["avg_TTFT"])
     throughput_output.append(metrics["throughput_qps"])
+
+# Save output budget sensitivity results
+output_df = pd.DataFrame({
+    'output_budget': output_budgets,
+    'mean_tbt': mean_tbt_output,
+    'p95_tbt': p95_tbt_output,
+    'mean_ttft': mean_ttft_output,
+    'throughput': throughput_output
+})
+output_df.to_csv('data/output_sensitivity.csv', index=False)
+print("Saved: data/output_sensitivity.csv")
 
 plt.figure()
 plt.plot(output_budgets, p95_tbt_output, marker='o')
